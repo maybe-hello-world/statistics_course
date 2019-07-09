@@ -1,5 +1,5 @@
-from typing import Union
-
+from typing import Union, Optional
+from scipy.stats import t, norm
 import numpy as np
 
 Vector = Union[np.ndarray, list, tuple]
@@ -155,4 +155,28 @@ def get_student_k(s2x: float, s2y: float, m: int, n: int) -> int:
     return np.floor(k)
 
 
+def norm_mean_pvalue(data: Vector, mean_x: Union[int, float], var: Optional[float] = None) -> float:
+    """
+    Calculate p-value for hypothesis of mean value of data sample = mean_x, where data sample is normally distributed
+
+    :param data: sample of data
+    :param mean_x: supposed mean value
+    :param var: (optional parameter) true variance of distribution
+    :return: p-value
+    """
+
+    n = len(data)
+
+    m = data.mean()
+
+    if var is None:
+        var = sum((data - m) ** 2) / (n - 1)
+        f = t(n-1)
+    else:
+        f = norm()
+
+    Z = (m - mean_x) / (np.sqrt(var) / np.sqrt(n))
+
+    p = 2 * min(f.cdf(Z), 1 - f.cdf(Z))
+    return p
 
